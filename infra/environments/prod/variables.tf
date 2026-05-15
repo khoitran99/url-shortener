@@ -34,6 +34,12 @@ variable "image_tag" {
   description = "Docker image tag to deploy."
 }
 
+variable "enable_nat_gateway" {
+  type        = bool
+  default     = true
+  description = "Set to false to destroy the NAT gateway and save ~$43/month when the environment is idle."
+}
+
 variable "db_name" {
   type        = string
   default     = "urlshortener"

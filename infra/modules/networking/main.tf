@@ -29,14 +29,16 @@ resource "aws_internet_gateway" "this" {
   tags   = { Name = "${var.project}-${var.env}-igw" }
 }
 
+# count = 0 when enable_nat_gateway is false → destroyed to save $43/month
 resource "aws_eip" "nat" {
+  count  = var.enable_nat_gateway ? 1 : 0
   domain = "vpc"
   tags   = { Name = "${var.project}-${var.env}-nat-eip" }
 }
 
-# Single NAT gateway in first public subnet (cost optimised for single-env)
 resource "aws_nat_gateway" "this" {
-  allocation_id = aws_eip.nat.id
+  count         = var.enable_nat_gateway ? 1 : 0
+  allocation_id = aws_eip.nat[0].id
   subnet_id     = aws_subnet.public[0].id
   depends_on    = [aws_internet_gateway.this]
   tags          = { Name = "${var.project}-${var.env}-nat" }
@@ -51,13 +53,18 @@ resource "aws_route_table" "public" {
   tags = { Name = "${var.project}-${var.env}-rtb-public" }
 }
 
+# Route table always exists; the default route to internet is a separate resource
+# so it can be removed without destroying the table itself.
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.this.id
-  }
-  tags = { Name = "${var.project}-${var.env}-rtb-private" }
+  tags   = { Name = "${var.project}-${var.env}-rtb-private" }
+}
+
+resource "aws_route" "private_nat" {
+  count                  = var.enable_nat_gateway ? 1 : 0
+  route_table_id         = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.this[0].id
 }
 
 resource "aws_route_table_association" "public" {

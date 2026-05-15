@@ -43,10 +43,11 @@ provider "aws" {
 # ── Networking ────────────────────────────────────────────────────────────────
 
 module "networking" {
-  source   = "../../modules/networking"
-  project  = var.project
-  env      = var.env
-  vpc_cidr = "10.0.0.0/16"
+  source             = "../../modules/networking"
+  project            = var.project
+  env                = var.env
+  vpc_cidr           = "10.0.0.0/16"
+  enable_nat_gateway = var.enable_nat_gateway
 }
 
 # ── ECR ───────────────────────────────────────────────────────────────────────
