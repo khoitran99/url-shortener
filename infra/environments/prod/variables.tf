@@ -40,6 +40,12 @@ variable "enable_nat_gateway" {
   description = "Set to false to destroy the NAT gateway and save ~$43/month when the environment is idle."
 }
 
+variable "rds_snapshot_id" {
+  type        = string
+  default     = ""
+  description = "RDS snapshot ID to restore from when recreating the database. Leave empty for a fresh DB."
+}
+
 variable "db_name" {
   type        = string
   default     = "urlshortener"

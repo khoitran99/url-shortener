@@ -28,3 +28,9 @@ variable "db_username" {
   type    = string
   default = "postgres"
 }
+
+variable "snapshot_identifier" {
+  type        = string
+  default     = ""
+  description = "RDS snapshot ID to restore from on creation. Leave empty for a fresh database."
+}

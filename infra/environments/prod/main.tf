@@ -74,14 +74,15 @@ module "alb" {
 # ── RDS PostgreSQL ────────────────────────────────────────────────────────────
 
 module "rds" {
-  source          = "../../modules/rds"
-  project         = var.project
-  env             = var.env
-  private_subnets = module.networking.private_subnets
-  rds_sg_id       = module.networking.rds_sg_id
-  instance_class  = "db.t4g.micro"
-  db_name         = var.db_name
-  db_username     = var.db_username
+  source              = "../../modules/rds"
+  project             = var.project
+  env                 = var.env
+  private_subnets     = module.networking.private_subnets
+  rds_sg_id           = module.networking.rds_sg_id
+  instance_class      = "db.t4g.micro"
+  db_name             = var.db_name
+  db_username         = var.db_username
+  snapshot_identifier = var.rds_snapshot_id
 }
 
 # ── ElastiCache Redis ─────────────────────────────────────────────────────────

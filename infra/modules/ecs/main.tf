@@ -12,7 +12,7 @@ resource "aws_cloudwatch_log_group" "api" {
 
 resource "aws_secretsmanager_secret" "database_url" {
   name                    = "${var.project}/${var.env}/database-url"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0  # immediate deletion so recreate never hits "pending deletion" conflict
   tags                    = { Name = "${var.project}-${var.env}-database-url" }
 }
 

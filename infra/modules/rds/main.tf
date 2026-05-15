@@ -6,7 +6,7 @@ resource "random_password" "db" {
 
 resource "aws_secretsmanager_secret" "db_password" {
   name                    = "${var.project}/${var.env}/db-password"
-  recovery_window_in_days = 7
+  recovery_window_in_days = 0  # immediate deletion so recreate never hits "pending deletion" conflict
   tags                    = { Name = "${var.project}-${var.env}-db-password" }
 }
 
@@ -41,11 +41,21 @@ resource "aws_db_instance" "this" {
   db_subnet_group_name   = aws_db_subnet_group.this.name
   vpc_security_group_ids = [var.rds_sg_id]
   parameter_group_name   = aws_db_parameter_group.this.name
-  skip_final_snapshot    = false
-  final_snapshot_identifier = "${var.project}-${var.env}-final"
+
+  # Snapshot handled by destroy.sh before terraform destroy runs
+  skip_final_snapshot = true
+
+  # Restore from snapshot on recreation. Ignored after first apply so Terraform
+  # does not try to recreate the instance when snapshot_identifier is later cleared.
+  snapshot_identifier = var.snapshot_identifier != "" ? var.snapshot_identifier : null
+
   backup_retention_period = 7
-  deletion_protection    = true
-  publicly_accessible    = false
+  deletion_protection     = true  # destroy.sh disables this via AWS CLI before terraform destroy
+  publicly_accessible     = false
+
+  lifecycle {
+    ignore_changes = [snapshot_identifier]
+  }
 
   tags = { Name = "${var.project}-${var.env}-postgres" }
 }
