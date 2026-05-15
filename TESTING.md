@@ -2,6 +2,11 @@
 
 This guide covers how to manually verify every user-facing behaviour of the URL Shortener before shipping a change.
 
+| Environment | Web | API base |
+|-------------|-----|----------|
+| Local | http://localhost:5173 | http://localhost:3001 |
+| Production | https://go.khoitv.com | https://api.go.khoitv.com |
+
 ---
 
 ## Prerequisites

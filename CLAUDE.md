@@ -48,12 +48,24 @@ pnpm --filter api test -- --testPathPattern=<filename>
 pnpm test:e2e
 ```
 
+## Domains
+
+| Environment | Web | API |
+|-------------|-----|-----|
+| Local | http://localhost:5173 | http://localhost:3001 |
+| Production | https://go.khoitv.com | https://api.go.khoitv.com |
+
+Both `go.khoitv.com` and `api.go.khoitv.com` are subdomains managed inside the existing `khoitv.com` Route 53 hosted zone — no separate hosted zone exists for the subdomain.
+
 ## API Contracts
 
 | Method | Path | Purpose |
 |--------|------|---------|
+| `GET` | `/health` | ALB health check — returns `{ status: "ok" }` |
 | `POST` | `/api/v1/data/shorten` | Accept `{ longUrl }`, return `{ shortUrl }` |
 | `GET` | `/api/v1/:shortUrl` | Redirect (HTTP 302) to the original long URL |
+
+`REDIRECT_PREFIX` constant (`apps/api/src/url/url.constants.ts`) controls the `/api/v1` prefix. The controller constructs the full `shortUrl` from `BASE_URL` + prefix + short code.
 
 ## Core Algorithm — URL Shortening
 
@@ -95,14 +107,20 @@ PORT=3001
 
 ## AWS Infrastructure
 
-| Service | Role |
-|---------|------|
-| ECS Fargate | API container hosting |
-| RDS (PostgreSQL) | Primary database |
-| ElastiCache (Redis) | Read-through cache |
-| CloudFront + S3 | React frontend |
-| ALB | Load balancing |
-| Route 53 | DNS |
+Region: `ap-southeast-1`. Terraform in `infra/`.
+
+| Service | Config | Role |
+|---------|--------|------|
+| ECS Fargate | 0.25 vCPU / 512 MB | NestJS API |
+| RDS PostgreSQL 16 | db.t4g.micro | Primary DB |
+| ElastiCache Redis 7 | cache.t4g.micro | Redirect cache |
+| CloudFront + S3 | PriceClass_100 | React SPA at go.khoitv.com |
+| ALB | TLS 1.3 | HTTPS entry point for API |
+| ACM | ap-southeast-1 + us-east-1 | Certs for ALB and CloudFront |
+| Secrets Manager | — | Stores `DATABASE_URL` for ECS |
+| ECR | — | Docker image registry |
+
+First deploy: `./infra/scripts/bootstrap.sh` → fill `terraform.tfvars` → `terraform apply` → `./infra/scripts/deploy.sh`.
 
 ## Performance Constraints to Keep in Mind
 

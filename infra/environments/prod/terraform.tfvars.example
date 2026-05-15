@@ -1,0 +1,22 @@
+# Copy this file to terraform.tfvars and fill in real values before running apply.
+# terraform.tfvars is gitignored — never commit it.
+
+project = "url-shortener"
+env     = "prod"
+region  = "ap-southeast-1"
+
+# go.khoitv.com is a subdomain of khoitv.com.
+# Use the hosted zone ID of the PARENT zone (khoitv.com), not a separate zone.
+# Find it with: aws route53 list-hosted-zones-by-name --dns-name khoitv.com
+domain         = "go.khoitv.com"      # CloudFront → React frontend
+api_domain     = "api.go.khoitv.com"  # ALB → NestJS API
+
+# Hosted zone ID of khoitv.com (NOT go.khoitv.com — no separate zone needed)
+hosted_zone_id = "REPLACE_WITH_KHOITV_COM_ZONE_ID"
+
+# PostgreSQL credentials
+db_name     = "urlshortener"
+db_username = "postgres"
+
+# Set by the deploy script — leave as "latest" for manual applies
+image_tag = "latest"

@@ -4,6 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-ioredis-yet';
+import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UrlModule } from './url/url.module';
 
@@ -26,6 +27,7 @@ import { UrlModule } from './url/url.module';
         return { store };
       },
     }),
+    HealthModule,
     PrismaModule,
     UrlModule,
   ],

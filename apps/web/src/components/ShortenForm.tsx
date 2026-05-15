@@ -8,6 +8,8 @@ type State =
   | { status: 'success'; shortUrl: string }
   | { status: 'error'; message: string };
 
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+
 export function ShortenForm() {
   const [longUrl, setLongUrl] = useState('');
   const [state, setState] = useState<State>({ status: 'idle' });
@@ -20,7 +22,7 @@ export function ShortenForm() {
 
     try {
       const body: ShortenRequest = { longUrl };
-      const res = await fetch('/api/v1/data/shorten', {
+      const res = await fetch(`${API_BASE}/api/v1/data/shorten`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
